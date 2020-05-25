@@ -15,4 +15,5 @@ else
 	mkdir ${dir}
 	echo "Le dossier de travail ${dir} est créé"
 fi
+
 ./metaSurface.bin "${HOME}/metaSurface" "${HOME}"
