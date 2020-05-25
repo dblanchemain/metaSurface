@@ -7,6 +7,8 @@ Pour intaller cette application :
 
 git clone https://github.com/dblanchemain/metaSurface
 
+copier le dossier /metaSurface à la racine du dossier personnel $(Home)
+
 puis pour linux :
 
 ./metaSurface.sh
