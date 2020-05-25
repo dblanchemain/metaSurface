@@ -1,0 +1,20 @@
+Fichier
+Nouvelle surface
+Ouvrir
+Enregistrer
+Commentaire
+Quitter
+Éditer
+Effacer
+Effacer Groupe
+Tout effacer
+――――――――
+Préférences
+Plugin
+Nouveau
+Edit
+Nettoyer
+Aide
+Manuel
+Faust
+À propos
