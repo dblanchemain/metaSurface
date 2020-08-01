@@ -19,3 +19,7 @@ make install PREFIX=/usr/local
 puis pour Linux :
 
 ./metaSurface.sh
+
+La documentation est disponible ici :
+
+http://blanchemain.info/Documents/Programmation/index.php?page=metaSurface
