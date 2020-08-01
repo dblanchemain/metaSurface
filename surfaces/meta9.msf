@@ -1,7 +1,7 @@
 padName=meta9
 type=9
 nameBkgFile=path5020-9.png
-pathBkgFile=/home/dominique/Compile/CodeBlocks/metaSurface2/surfacesBkg
+pathBkgFile=./surfacesBkg
 surfaceWidth=700
 surfaceHeight=701
 editLineColor=f80a0aff
@@ -21,8 +21,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=113
-cy=113
+Cx=113
+Cy=113
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -49,8 +49,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=345
-cy=113
+Cx=345
+Cy=113
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -77,8 +77,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=581
-cy=113
+Cx=581
+Cy=113
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -105,8 +105,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=114
-cy=345
+Cx=114
+Cy=345
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -133,8 +133,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=344
-cy=345
+Cx=344
+Cy=345
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -161,8 +161,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=584
-cy=345
+Cx=584
+Cy=345
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -189,8 +189,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=112
-cy=583
+Cx=112
+Cy=583
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -217,8 +217,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=344
-cy=582
+Cx=344
+Cy=582
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -245,8 +245,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=585
-cy=581
+Cx=585
+Cy=581
 dimMixer=1.0
 gainMin=0
 gainMax=2

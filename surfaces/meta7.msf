@@ -1,7 +1,7 @@
 padName=meta7
 type=7
 nameBkgFile=hexa1-7.png
-pathBkgFile=/home/dominique/Compile/CodeBlocks/metaSurface2/surfacesBkg
+pathBkgFile=./surfacesBkg
 surfaceWidth=700
 surfaceHeight=700
 editLineColor=f90706ff
@@ -21,8 +21,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=232
-cy=137
+Cx=232
+Cy=137
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -53,8 +53,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=463
-cy=133
+Cx=463
+Cy=133
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -85,8 +85,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=118
-cy=344
+Cx=118
+Cy=344
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -117,8 +117,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=350
-cy=348
+Cx=350
+Cy=348
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -149,8 +149,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=581
-cy=349
+Cx=581
+Cy=349
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -181,8 +181,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=234
-cy=554
+Cx=234
+Cy=554
 dimMixer=1.0
 gainMin=0
 gainMax=2
@@ -213,8 +213,8 @@ canaux=0
 daw=0
 duree0
 track=0
-cx=464
-cy=548
+Cx=464
+Cy=548
 dimMixer=1.0
 gainMin=0
 gainMax=2
