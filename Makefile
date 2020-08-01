@@ -25,6 +25,7 @@ install:
 	cp -Rfa surfaces $(prefix)/share/metaSurface
 	cp -Rfa surfacesBkg $(prefix)/share/metaSurface
 	cp -Rfa faust $(prefix)/share/metaSurface
+	cp -Rfa sound $(prefix)/share/metaSurface
 	echo Thème=base >> parametres.conf
 	echo Lang=Fr >> parametres.conf
 	echo dossierConfig=$(prefix)/share/metaSurface >> parametres.conf
