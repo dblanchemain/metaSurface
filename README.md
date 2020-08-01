@@ -23,3 +23,5 @@ puis pour Linux :
 La documentation est disponible ici :
 
 http://blanchemain.info/Documents/Programmation/index.php?page=metaSurface
+
+Cette version 1.0 a été réalisée et testé sur debian/LibraZik2
