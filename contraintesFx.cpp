@@ -1,3 +1,19 @@
+/* MetaSurface  .
+ *
+ * this file is part of the MetaSurface application
+ *
+ * Copyright 2020-2021 dominique Blanchemain
+ *
+ *
+ * MetaSurface is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License along with this program;
+* If not, see http://www.gnu.org/licenses.
+*/
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include <iostream>
@@ -24,11 +40,7 @@ ContraintesFx::ContraintesFx(Configuration *def){
   font.loadFromFile(adr.str());
   adr.clear();
   adr.str("");
-  adr << std::fixed << def->getAppGui() << "/fondFx3.png";
-  fond.loadFromFile(adr.str());
-  fondContraintesFx.setTexture(fond);
-  adr.clear();
-  adr.str("");
+  
   adr << std::fixed << def->getAppGui() << "/bNoSelect.png";
   bNoSelect.loadFromFile(adr.str());
   adr.clear();
@@ -66,7 +78,7 @@ ContraintesFx::ContraintesFx(Configuration *def){
 
 ContraintesFx::~ContraintesFx(){
 }
-bool ContraintesFx::drawContraintesFx(Plugin& newPlug, int id, Pave *pv, int plug){
+bool ContraintesFx::drawContraintesFx(Plugin& newPlug, int id, Pave *pv, int plug,int mode){
 	ls=newPlug.getListPlugin();
   	tabPlug=newPlug.getTabPlugin();
   	idPlugin=id;
@@ -88,6 +100,9 @@ bool ContraintesFx::drawContraintesFx(Plugin& newPlug, int id, Pave *pv, int plu
  		tabParam.push_back(defParam);
   	}
   	initContraintesFx(pv,plug);
+  	if(mode==1){
+  		defautContraintesFxInt(pv,plug);
+  	}
 	rtf=0;
   	float winHeight=58+(28*tabPlug[id].nbpar)+60;
   	float bheight;
@@ -180,7 +195,7 @@ bool ContraintesFx::drawContraintesFx(Plugin& newPlug, int id, Pave *pv, int plu
 			
 			for(int i=0;i<tabPlug[id].nbpar;i++){
 				labelsPlugin.setString(tabPlug[id].param[i].nom);
-				labelsPlugin.setPosition(30,50+(i*30));
+				labelsPlugin.setPosition(20,50+(i*30));
 				labelsPlugin.setFont(font);
 			 	labelsPlugin.setCharacterSize(13);
 			 	labelsPlugin.setFillColor(sf::Color(0,0,0));
@@ -218,7 +233,7 @@ bool ContraintesFx::drawContraintesFx(Plugin& newPlug, int id, Pave *pv, int plu
 			}			
 			
 			winContraintesFx.draw(defaut);
-			winContraintesFx.draw(global);
+			//winContraintesFx.draw(global);
 			winContraintesFx.draw(annuler);
 			winContraintesFx.draw(valider);
 			

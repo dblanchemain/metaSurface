@@ -1,3 +1,19 @@
+/* MetaSurface  .
+ *
+ * this file is part of the MetaSurface application
+ *
+ * Copyright 2020-2021 dominique Blanchemain
+ *
+ *
+ * MetaSurface is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License along with this program;
+* If not, see http://www.gnu.org/licenses.
+*/
 #include <SFML/Graphics.hpp>
 
 #include <sstream>
@@ -377,15 +393,19 @@ void Parametres::onClick(sf::Event e){
   if(e.mouseButton.x>114 && e.mouseButton.x<127 && e.mouseButton.y>74 && e.mouseButton.y<96){
     Lang="Fr"; 
   }
+  /*
   if(e.mouseButton.x>276 && e.mouseButton.x<289 && e.mouseButton.y>74 && e.mouseButton.y<96){
     Lang="En";
   }
+  */
   if(e.mouseButton.x>114 && e.mouseButton.x<127  && e.mouseButton.y>108 && e.mouseButton.y<130){
     Theme="base";
   }
+  /*
   if(e.mouseButton.x>276 && e.mouseButton.x<289  && e.mouseButton.y>108 && e.mouseButton.y<130){
     Theme="Dark";
   }
+  */
   if(e.mouseButton.x>114 && e.mouseButton.x<132  && e.mouseButton.y>224 && e.mouseButton.y<234){
     daw="Ardour";
   }
@@ -588,6 +608,9 @@ void Parametres::saveParametres(){
 	}else{  // sinon
      cerr << "Erreur à l'ouverture !" << endl;
 	}
+}
+string Parametres::getDaw(){
+	return daw;
 }
 string Parametres::getNavigateur(){
 	return Navigateur;

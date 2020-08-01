@@ -1,3 +1,19 @@
+/* MetaSurface  .
+ *
+ * this file is part of the MetaSurface application
+ *
+ * Copyright 2020-2021 dominique Blanchemain
+ *
+ *
+ * MetaSurface is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License along with this program;
+* If not, see http://www.gnu.org/licenses.
+*/
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include <iostream>
@@ -173,6 +189,7 @@ void selectFile::initSelector(string fdir){
   adr.str("");
 
   dossierPath.setFont(font);
+  dossierPath.setString("");
   dossierPath.setCharacterSize(selectorFontSize);
   dossierPath.setPosition(sf::Vector2f(60, 8));
   dossierPath.setFillColor(selectorFontColor);
@@ -188,7 +205,10 @@ void selectFile::initSelector(string fdir){
   listDirsIndex2=0;
   listFilesIndex2=0;
   buttonMouse=0;
-  
+  flagSelectorCurseur=0;
+  selectorCurseur.setSize(sf::Vector2f(2,12));
+  selectorCurseur.setFillColor(sf::Color(0,0,0,255));
+  selectorCurseur.setPosition(56,412);
   std::cout << "width fileSelector"<<winSelectorWidth << std::endl;
 }
 
@@ -254,7 +274,14 @@ string selectFile::selector(){
 
 	drawDirs2();
 	drawFiles();
-        
+   if(flagSelectorCurseur==1){
+		if(clockCurseur.getElapsedTime()>sf::seconds(0.8f)){
+			winSelector.draw(selectorCurseur);
+			if(clockCurseur.getElapsedTime()>sf::seconds(1.6f)){
+				clockCurseur.restart();
+			}
+		}
+	}     
 	
    winSelector.display();
 	winSelector.popGLStates();
@@ -402,6 +429,10 @@ void selectFile::onClick(sf::Event e){
    	}
       winSelector.close();
    }
+   if(e.mouseButton.x>50 && e.mouseButton.x<348 && e.mouseButton.y>408 && e.mouseButton.y<432){
+     flagSelectorCurseur=1;
+  	  selectorCurseur.setPosition(56,412);
+   }
    if(e.mouseButton.x>10 && e.mouseButton.x<34 && e.mouseButton.y>406 && e.mouseButton.y<430){
      createDir(txt);
    }
@@ -421,15 +452,20 @@ void selectFile::onMouseUp(sf::Event e){
 void selectFile::newText(sf::Event e){
 	int key=e.key.code;
 	int rtn=0;
+	int ph;
 	if (e.text.unicode < 128){
 		switch (key){
 	     case 8:
 	       	txt=txt.substr(0,txt.length()-1);
 	       	nText.setString(txt);
+	       	ph=nText.getLocalBounds().width+62;
+				selectorCurseur.setPosition(ph,411);
 	 			break;
 	     default:
 				txt=txt+static_cast<char>(e.text.unicode);
 				nText.setString(txt);
+				ph=nText.getLocalBounds().width+62;
+				selectorCurseur.setPosition(ph,411);
 				break;
 		}
 	}
@@ -573,4 +609,7 @@ void selectFile::drawFiles(){
 		j++;
 		i++;
 	}
+}
+string selectFile::getPath(){
+	return dossierPath.getString();
 }

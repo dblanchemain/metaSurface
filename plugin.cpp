@@ -1,3 +1,19 @@
+/* MetaSurface  .
+ *
+ * this file is part of the MetaSurface application
+ *
+ * Copyright 2020-2021 dominique Blanchemain
+ *
+ *
+ * MetaSurface is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License along with this program;
+* If not, see http://www.gnu.org/licenses.
+*/
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include <iostream>
@@ -64,6 +80,11 @@ Plugin::Plugin(){
   adresse.setCharacterSize(13);
   adresse.setFillColor(sf::Color(0, 0, 0));
   adresse.setPosition(8,18);
+  labelLog.setFont(font);
+  labelLog.setString("Log");
+  labelLog.setCharacterSize(13);
+  labelLog.setFillColor(sf::Color(0, 0, 0));
+  labelLog.setPosition(284,218);
   
   winSelectCurseur.setSize(sf::Vector2f(110,24));
   winSelectCurseur.setFillColor(sf::Color(100,100,100));
@@ -113,8 +134,11 @@ void Plugin::setPlugin(string Theme, string gui, string uConfig, string edit, st
    idet.loadFromFile(adr.str());
    adr.clear();
    adr.str("");
+   
    daw.setTexture(bNoSelect);
    daw.setPosition(68,20);
+   flog.setTexture(bNoSelect);
+   flog.setPosition(320,220);
    fondPlugin.setTexture(selectF1);
    fondPlugin.setPosition(sf::Vector2f(0, 0));
    faustIde.setTexture(idet);
@@ -161,7 +185,7 @@ bool Plugin::drawPlugin(bool edit,int ext, string titreWPlugin){
  	 tabnparam.clear();
   }
   externe=ext;
-  if(externe==2){
+  if(externe==1){
   	daw.setTexture(bselect);
   }else{
   	daw.setTexture(bNoSelect);
@@ -219,6 +243,8 @@ bool Plugin::drawPlugin(bool edit,int ext, string titreWPlugin){
    winPlugin.draw(min);
    winPlugin.draw(max);
    winPlugin.draw(adresse);
+   winPlugin.draw(labelLog);
+   winPlugin.draw(flog);
    winPlugin.draw(faustIde);
  
    if(flagPluginCurseur==1){
@@ -245,42 +271,42 @@ void Plugin::systemPlugin(){
   defPlugin={0,"","","",0,{}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Compression","compressor","",5,{}};
-  defPlugin.param={{0,"Ratio",1.0,20.0,"COMPRESSOR/0x00/Compression_Control/Ratio"},{1,"Threshold",-100,10.0,"COMPRESSOR/0x00/Compression_Control/Threshold"},{2,"Time",1.0,1000,"COMPRESSOR/0x00/Compression_Response/Attack"},{3,"Release",1.0,1000,"COMPRESSOR/0x00/Compression_Response/Release"},{4,"Gain",-96,96,"COMPRESSOR/Makeup_Gain"}};
+  defPlugin.param={{0,"Ratio",1.0,20.0,"COMPRESSOR/0x00/Compression_Control/Ratio",0},{1,"Threshold",-100,10.0,"COMPRESSOR/0x00/Compression_Control/Threshold",0},{2,"Time",1.0,1000,"COMPRESSOR/0x00/Compression_Response/Attack",0},{3,"Release",1.0,1000,"COMPRESSOR/0x00/Compression_Response/Release",0},{4,"Gain",-96,96,"COMPRESSOR/Makeup_Gain",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Delay","delay","",3,{}};
-  defPlugin.param={{0,"Delay",0.0,5000,"DELAY/0x00/delay"},{1,"Feedback",0,100,"DELAY/0x00/feedback"},{2,"Interpolation",10,100,"DELAY/0x00/interpolation"}};
+  defPlugin.param={{0,"Delay",0.0,5000,"DELAY/0x00/delay",0},{1,"Feedback",0,100,"DELAY/0x00/feedback",0},{2,"Interpolation",10,100,"DELAY/0x00/interpolation",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Distortion","dm.cubicnl_demo","",2,{}};
-  defPlugin.param={{0,"Drive",0.0,1.0,"CUBIC_NONLINEARITY_cubicnl/Drive"},{1,"Offset",0.0,1.0,"CUBIC_NONLINEARITY_cubicnl/Offset"}};
+  defPlugin.param={{0,"Drive",0.0,1.0,"CUBIC_NONLINEARITY_cubicnl/Drive",0},{1,"Offset",0.0,1.0,"CUBIC_NONLINEARITY_cubicnl/Offset",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Flanger","flangerMono","",6,{}};
-  defPlugin.param={{0,"Speed",0.0,10.0,"FLANGER/0x00/Speed"},{1,"Depth",0,1.0,"FLANGER/0x00/Depth"},{2,"Feedback",-1.0,1.0,"FLANGER/0x00/Feedback"},{3,"Delay",0.0,20.0,"FLANGER/Delay_Controls/Flange_Delay"},{4,"Offset",0.0,20.0,"FLANGER/Delay_Controls/Delay_Offset"},{5,"Level",-60,10,"FLANGER/0x00/Flanger_Output_Level"}};
+  defPlugin.param={{1,"Speed",0.0,10.0,"FLANGER/0x00/Speed",0},{2,"Depth",0,1.0,"FLANGER/0x00/Depth",0},{3,"Feedback",-1.0,1.0,"FLANGER/0x00/Feedback",0},{4,"Delay",0.0,20.0,"FLANGER/Delay_Controls/Flange_Delay",0},{5,"Offset",0.0,20.0,"FLANGER/Delay_Controls/Delay_Offset",0},{6,"Level",-60,10,"FLANGER/0x00/Flanger_Output_Level",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Freeverb","freeverb","",4,{}};
-  defPlugin.param={{0,"Damp",0.0,1.0,"Freeverb/0x00/Damp"},{1,"Room",0.0,1.0,"Freeverb/0x00/RoomSize"},{2,"Stereo",0.0,1.0,"Freeverb/0x00/Stereo_Spread"},{3,"Wet",0.0,1.0,"Freeverb/Wet"}};
+  defPlugin.param={{0,"Damp",0.0,1.0,"Freeverb/0x00/Damp",0},{1,"Room",0.0,1.0,"Freeverb/0x00/RoomSize",0},{2,"Stereo",0.0,1.0,"Freeverb/0x00/Stereo_Spread",0},{3,"Wet",0.0,1.0,"Freeverb/Wet",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Granulator","granulator","",5,{}};
-  defPlugin.param={{0,"Decal",1.0,1.0,"GRANULATOR/0x00/decal"},{1,"Feedback",0.0,2.0,"GRANULATOR/0x00/feedback"},{2,"Population",0.0,1.0,"GRANULATOR/0x00/population"},{3,"Speed",1.0,4.0,"GRANULATOR/0x00/speed"},{4,"Size",4.0,200.0,"GRANULATOR/0x00/taille"}};
+  defPlugin.param={{0,"Decal",1.0,1.0,"GRANULATOR/0x00/decal",0},{1,"Feedback",0.0,2.0,"GRANULATOR/0x00/feedback",0},{2,"Population",0.0,1.0,"GRANULATOR/0x00/population",0},{3,"Speed",0.125,4.0,"GRANULATOR/0x00/speed",0},{4,"Size",4.0,200.0,"GRANULATOR/0x00/taille",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"HPF/LPF","filters","",2,{}};
-  defPlugin.param={{0,"HPF",20.0,20000.0,"FILTERS/0x00/HPF_Freq"},{1,"LPF",20.0,20000.0,"FILTERS/0x00/LPF_Freq"}};
+  defPlugin.param={{0,"HPF",20.0,20000.0,"FILTERS/0x00/HPF_Freq",0},{1,"LPF",20.0,20000.0,"FILTERS/0x00/LPF_Freq",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Mixer","mixer","",0,{}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Moog_VCF","moog_vcf","",3,{}};
-  defPlugin.param={{0,"Frequency",1.0,88.0,"MOOG_VCF__Voltage_Controlled_Filter_/Corner_Frequency"},{1,"Resonance",0,1.0,"MOOG_VCF__Voltage_Controlled_Filter_/Corner_Resonance"},{2,"Level",-60,20,"MOOG_VCF__Voltage_Controlled_Filter_/VCF_Output_Level"}};
+  defPlugin.param={{0,"Frequency",1.0,88.0,"MOOG_VCF__Voltage_Controlled_Filter_/Corner_Frequency",0},{1,"Resonance",0,1.0,"MOOG_VCF__Voltage_Controlled_Filter_/Corner_Resonance",0},{2,"Level",-60,20,"MOOG_VCF__Voltage_Controlled_Filter_/VCF_Output_Level",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"ParametricEQ","parametric_eq","",7,{}};
-  defPlugin.param={{0,"Low Boost",-40.0,40.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Low_Shelf/Low_Boost_Cut"},{1,"Low Freq.",1.0,5000.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Low_Shelf/Transition_Frequency"},{2,"Peak Boost",-40.0,40.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Peaking_Equalizer/Peak_Boost_Cut"},{3,"Peak Freq.",0.0,100.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Peaking_Equalizer/Peak_Frequency"},{4,"Peak Q",1.0,1000.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Peaking_Equalizer/Peak_Q"},{5,"High Boost",-40,40,"PARAMETRIC_EQ_SECTIONS/CTRL/High_Shelf/High_Boost_Cut"},{6,"High Freq",20,10000,"PARAMETRIC_EQ_SECTIONS/CTRL/High_Shelf/Transition_Frequency"}};
+  defPlugin.param={{0,"Low Boost",-40.0,40.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Low_Shelf/Low_Boost_Cut",0},{1,"Low Freq.",1.0,5000.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Low_Shelf/Transition_Frequency",0},{2,"Peak Boost",-40.0,40.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Peaking_Equalizer/Peak_Boost_Cut",0},{3,"Peak Freq.",0.0,100.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Peaking_Equalizer/Peak_Frequency",0},{4,"Peak Q",1.0,1000.0,"PARAMETRIC_EQ_SECTIONS/CTRL/Peaking_Equalizer/Peak_Q",0},{5,"High Boost",-40,40,"PARAMETRIC_EQ_SECTIONS/CTRL/High_Shelf/High_Boost_Cut",0},{6,"High Freq",20,10000,"PARAMETRIC_EQ_SECTIONS/CTRL/High_Shelf/Transition_Frequency",0}};
   tabPlugin.push_back(defPlugin);
-  defPlugin={0,"Phaser","phaserMono","",4,{}};
-  defPlugin.param={{0,"Speed",0.0,10.0,"PHASER/0x00/Speed"},{1,"Feedback",-1.0,1.0,"PHASER/0x00/Feedback_Gain"},{2,"Output Level",-60.0,10.0,"PHASER/0x00/Phaser_Output_Level"},{3,"Notch_Depth",0.0,1.0,"PHASER/0x00/Notch_Depth__Intensity_"}};
+  defPlugin={0,"Phaser","phaserMono","",8,{}};
+  defPlugin.param={{2,"Speed",0.0,10.0,"PHASER/0x00/Speed",0},{3,"Notch_Depth",0.0,1.0,"PHASER/0x00/Notch_Depth__Intensity_",0},{4,"Feedback",-1.0,1.0,"PHASER/0x00/Feedback_Gain",0},{5,"NotchWidth",10,5000,"PHASER/0x00/Notch width",0},{6,"MinNotchFreq",20,5000,"PHASER/0x00/Min_Notch1_Freq",0},{7,"MaxNotchFreq",20,10000,"PHASER/0x00/Max_Notch1_Freq",0},{8,"NotchFreqratio",1.1,4,"PHASER/0x00/Notch_Freq_Ratio",0},{9,"Output Level",-60.0,10.0,"PHASER/0x00/Phaser_Output_Level",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"RingModulator","ringModulator","",2,{}};
-  defPlugin.param={{0,"Depth",0.0,1.0,"RING_MODULATOR/0x00/depth"},{1,"Frequency",0.0,1000.0,"RING_MODULATOR/0x00/frequency"}};
+  defPlugin.param={{0,"Depth",0.0,1.0,"RING_MODULATOR/0x00/depth",0},{1,"Frequency",0.0,1000.0,"RING_MODULATOR/0x00/frequency",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"Speed","Speed","",1,{}};
-  defPlugin.param={{0,"Speed",-1.0,3.0,"Player/Param/speed_"}};
+  defPlugin.param={{0,"Speed",-1.0,3.0,"Player/Param/speed_",0}};
   tabPlugin.push_back(defPlugin);
   defPlugin={0,"SpectrumAnalyser","spectral_level","",0,{}};
   tabPlugin.push_back(defPlugin);
@@ -347,11 +373,26 @@ void Plugin::onClick(sf::Event e){
    	flagPluginCurseur=1;
    	winPluginCurseur.setPosition(338,194);
    }
-   if(e.mouseButton.x>70 && e.mouseButton.x<342 && e.mouseButton.y>218 && e.mouseButton.y<240){
+   if(e.mouseButton.x>70 && e.mouseButton.x<272 && e.mouseButton.y>218 && e.mouseButton.y<240){
    	textDef=7;
    	apptxt="";
    	flagPluginCurseur=1;
-   	winPluginCurseur.setPosition(338,222);
+   	winPluginCurseur.setPosition(268,222);
+   }
+   if(e.mouseButton.x>320 && e.mouseButton.x<336 && e.mouseButton.y>222 && e.mouseButton.y<238){
+   	if(flaglog==0){
+   		flaglog=1;
+   		flog.setTexture(bselect);
+   		if(editMode==1){
+   			tabnparam[numid].mod=1;
+   		}
+   	}else{
+   		flaglog=0;
+   		flog.setTexture(bNoSelect);
+   		if(editMode==1){
+   			tabnparam[numid].mod=0;
+   		}
+   	}
    }
    if(e.mouseButton.x>356 && e.mouseButton.x<372 && e.mouseButton.y>194 && e.mouseButton.y<210){
    	gesIndex(-1);
@@ -400,7 +441,13 @@ void Plugin::gesIndex(int index){
 		adr.clear();
 		adr.str("");
 		adresse.setString(tabnparam[numid].adr);
-		adresse.setPosition(338-adresse.getLocalBounds().width-2,220);
+		adresse.setPosition(268-adresse.getLocalBounds().width-2,220);
+		flaglog=tabnparam[numid].mod;
+		if(flaglog==0){
+			flog.setTexture(bNoSelect);
+		}else{
+			flog.setTexture(bselect);
+		}
 	}
 
 	if(n==idparam){
@@ -454,15 +501,17 @@ void Plugin::newCodePlugin(){
 	if(nameFx.getString()==""){
 		std::cout << "Vous devez définir le nom de ce plugin!"<< std::endl;
 	}else{
-		int rt=1;
-		nameFile=userConfig+"/Plugins/"+nameFx.getString()+".lib";
-		if(!boost::filesystem::exists(nameFile)){
-			nameFile=userConfig+"/Plugins/"+"nplug.lib";
-		}
-		command=editeur+"  "+nameFile+" -f faust-mode -geometry 110x40 &";
-		rt=system(const_cast<char*>(command.c_str()));
-		if(rt!=1){
-			std::cout << "rt " << rt << std::endl;
+		if(externe!=1){
+			int rt=1;
+			nameFile=userConfig+"/Plugins/"+nameFx.getString()+".lib";
+			if(!boost::filesystem::exists(nameFile)){
+				nameFile=userConfig+"/Plugins/"+"nplug.lib";
+			}
+			command=editeur+"  "+nameFile+" -f faust-mode -geometry 110x40 &";
+			rt=system(const_cast<char*>(command.c_str()));
+			if(rt!=1){
+				std::cout << "rt " << rt << std::endl;
+			}
 		}
 	}
 }
@@ -472,15 +521,17 @@ void Plugin::newFaustIde(){
 	if(nameFx.getString()==""){
 		std::cout << "Vous devez définir le nom de ce plugin!"<< std::endl;
 	}else{
-		int rt=1;
-		nameFile=userConfig+"/Plugins/"+nameFx.getString()+".lib";
-		if(!boost::filesystem::exists(nameFile)){
-			nameFile=userConfig+"/Plugins/"+"nplug.lib";
-		}
-		command=navigateur+" https://faustide.grame.fr &";
-		rt=system(const_cast<char*>(command.c_str()));
-		if(rt!=1){
-			std::cout << "rt " << rt << std::endl;
+		if(externe!=1){
+			int rt=1;
+			nameFile=userConfig+"/Plugins/"+nameFx.getString()+".lib";
+			if(!boost::filesystem::exists(nameFile)){
+				nameFile=userConfig+"/Plugins/"+"nplug.lib";
+			}
+			command=navigateur+" https://faustide.grame.fr &";
+			rt=system(const_cast<char*>(command.c_str()));
+			if(rt!=1){
+				std::cout << "rt " << rt << std::endl;
+			}
 		}
 	}
 }
@@ -489,7 +540,11 @@ void Plugin::newPluginText(sf::Event e){
    stringstream adr;
    if (e.text.unicode < 128){
 		if(key==8){
-	      apptxt=apptxt.substr(0,apptxt.length()-1);
+			if(apptxt.length()-1>0){
+	      	apptxt=apptxt.substr(0,apptxt.length()-1);
+	      }else{
+	      	apptxt="";
+	      }
 	 	}else{
 			apptxt=apptxt+static_cast<char>(e.text.unicode);
 		}
@@ -507,22 +562,37 @@ void Plugin::newPluginText(sf::Event e){
        		case 3:
        			id.setString(apptxt);
        			id.setPosition(110-id.getLocalBounds().width-2,192);
+       			if(editMode==1 && apptxt!="-" && tabnparam.size()>numid){
+       				tabnparam[numid].id=stoi(apptxt);
+       			}
        			break;
        		case 4:
        			param.setString(apptxt);
        			param.setPosition(198-param.getLocalBounds().width-2,192);
+       			if(editMode==1 && apptxt!="" && tabnparam.size()>numid){
+       				tabnparam[numid].nom=apptxt;
+       			}
        			break;
        		case 5:
        			min.setString(apptxt);
        			min.setPosition(268-min.getLocalBounds().width-2,192);
+       			if(editMode==1 && apptxt!="-" && apptxt!="" && tabnparam.size()>numid){
+						tabnparam[numid].min=stof(apptxt);
+					}
        			break;
        		case 6:
        			max.setString(apptxt);
        			max.setPosition(338-max.getLocalBounds().width-2,192);
+       			if(editMode==1 && apptxt!="-" && apptxt!=""  && tabnparam.size()>numid){
+       				tabnparam[numid].max=stof(apptxt);
+       			}
        			break;
        		case 7:
        			adresse.setString(apptxt);
-       			adresse.setPosition(338-adresse.getLocalBounds().width-2,220);
+       			adresse.setPosition(268-adresse.getLocalBounds().width-2,220);
+       			if(editMode==1 && apptxt!="" && apptxt!=""  && tabnparam.size()>numid){
+       				tabnparam[numid].adr=apptxt;
+       			}
        			break;
        		default:
        			break;
@@ -542,7 +612,12 @@ void Plugin::addParamPlugin(){
 	nparam.min=stof(s);
 	s=max.getString();
 	nparam.max=stof(s);
-	nparam.adr=adresse.getString();
+	if(nparam.adr==""){
+		nparam.adr="-";
+	}else{
+		nparam.adr=adresse.getString();
+	}
+	nparam.mod=flaglog;
 	tabnparam.push_back(nparam);
 	std::cout << "idParam: "<<idparam<< "   "<<s<<"nparam"<<tabnparam[idparam].nom  << std::endl;
 	idparam++;
@@ -551,6 +626,8 @@ void Plugin::addParamPlugin(){
 	min.setString("");
 	max.setString("");
 	adresse.setString("");
+	flaglog=0;
+	flog.setTexture(bNoSelect);
 	numid=idparam;
 }
 void Plugin::delParamPlugin(){
@@ -580,7 +657,7 @@ void Plugin::readListPlugin(){
   float s1;
   int s2;
   string pf[2];
-  string pf2[7];
+  vector<string> pf2;
   vector<string> pf3;
   vector<string> pf4;
   int i=0;
@@ -596,15 +673,8 @@ void Plugin::readListPlugin(){
 	     p = std::strtok(NULL," ");
        }
        if(pf[0]=="plugin"){
-       	int j=0;
-       	char * cstr2 = new char [pf[1].length()+1];
-       	std::strcpy (cstr2, pf[1].c_str());
-       	char * p2 = std::strtok (cstr2,",");
-       	while (p2!=0){
- 	     		pf2[j]=p2;
- 	     		j++;
-	     		p2 = std::strtok(NULL,",");
-      	}
+      	pf2=explode(pf[1], ',');
+      	std::cout << "pf1 ok "<<pf[1]<<pf2.size()<< std::endl;
       	defPlugin.type=stoi(pf2[0]);
       	defPlugin.nomFx=pf2[1];
       	defPlugin.fx=pf2[2];
@@ -612,8 +682,14 @@ void Plugin::readListPlugin(){
       	defPlugin.nbpar=stoi(pf2[4]);
        }
        
+       if(defPlugin.type==2){
+   		externe=1;
+   		daw.setTexture(bselect);
+   	 }else{
+   		externe=0;
+   		daw.setTexture(bNoSelect);
+   	 }
        if(pf[0]=="param"){
-      	std::cout << "pf1 "<<pf[1]  << std::endl;
       	pf3=explode(pf[1], ';');
       	for(int m=0;m<pf3.size();m++){
       		std::cout << "size "<<pf3.size()<<"param pf3: "<<pf3[m]  << std::endl;
@@ -625,11 +701,11 @@ void Plugin::readListPlugin(){
  	     		pr.min=stof(pf4[2]);
  	     		pr.max=stof(pf4[3]);
  	     		pr.adr=pf4[4];
+ 	     		pr.mod=stoi(pf4[5]);
  	     		defPlugin.param.push_back(pr);
       	}
 			pf3.clear();
-			pf4.clear();
-			
+			pf4.clear();	
        }
        if(pf[0]=="end"){
        	tabPlugin.push_back(defPlugin);
@@ -694,26 +770,36 @@ void Plugin::writeListPlugin(){
 	stringstream adr;
 	ofstream fichier(file, ios::out | ios::app);	
 	plugin defPlugin;
+	if(externe==1){
+   	defPlugin.type=2;
+   }else{
+   	defPlugin.type=1;
+   }
    if(fichier){
-   	string np="plugin="+to_string(externe)+","+nameFx.getString()+","+fonctionFx.getString()+","+path+","+to_string(idparam);
+   	if(fonctionFx.getString()==""){
+   		fonctionFx.setString("-");
+   	}
+   	string np="plugin="+to_string(defPlugin.type)+","+nameFx.getString()+","+fonctionFx.getString()+","+path+","+to_string(idparam);
    	fichier<<np<< endl;
    	for(int i=0;i<idparam;i++){
-   		adr<<tabnparam[i].id<<","<<tabnparam[i].nom<<","<<tabnparam[i].min<<","<<tabnparam[i].max<<","<<tabnparam[i].adr;
+   		adr<<tabnparam[i].id<<","<<tabnparam[i].nom<<","<<tabnparam[i].min<<","<<tabnparam[i].max<<","<<tabnparam[i].adr+","+to_string(tabnparam[i].mod);
    		s=s+adr.str()+";";
    		adr.clear();
 			adr.str("");
    	}
    	s=s.substr(0,s.length()-1);
-   	fichier<<"param="<<s<< endl;  
+   	if(s!=""){
+   		fichier<<"param="<<s<< endl;
+   	} 
    	fichier<<"end=" << endl;
    fichier.close();
-   if(externe==1){
-   	defPlugin.type=2;
-   }else{
-   	defPlugin.type=1;
-   }
+   
 	defPlugin.nomFx=nameFx.getString();
-	defPlugin.fx=fonctionFx.getString();
+	if(externe==0){
+		defPlugin.fx=fonctionFx.getString();
+	}else{
+		defPlugin.fx="";
+	}
 	defPlugin.path=path;
 	defPlugin.nbpar=idparam;
 	for(int i=0;i<idparam;i++){
@@ -748,13 +834,15 @@ void Plugin::writeUsrPlugin(){
 	   		fichier<<s<< endl;
 	   		s2="";
 	   		for(int j=0;j<tabPlugin[i].nbpar;j++){
-		   		adr<<tabPlugin[i].param[j].id<<","<<tabPlugin[i].param[j].nom<<","<<tabPlugin[i].param[j].min<<","<<tabPlugin[i].param[j].max<<","<<tabPlugin[i].param[j].adr;
+		   		adr<<tabPlugin[i].param[j].id<<","<<tabPlugin[i].param[j].nom<<","<<tabPlugin[i].param[j].min<<","<<tabPlugin[i].param[j].max<<","<<tabPlugin[i].param[j].adr<<","<<tabPlugin[i].param[j].mod;
 		   		s2=s2+adr.str()+";";
 		   		adr.clear();
 					adr.str("");
 	   		}
 	   		s2=s2.substr(0,s2.length()-1);
-	   		fichier<<"param="<<s2<< endl;  
+	   		if(s!=""){
+   				fichier<<"param="<<s2<< endl;
+   			} 
 	   		fichier<<"end=" << endl;
 	  		}
 	  		std::cout << it->first << " => " << it->second << " plugin name "<<tabPlugin[it->second].nomFx<<'\n';
@@ -1030,11 +1118,15 @@ void Plugin::modifPlugin(int pid){
 			externe=1;
    		daw.setTexture(bselect);
    }else{
-   		externe=tabPlugin[pid].type;
+   		externe=0;
    		daw.setTexture(bNoSelect);
    }
 	nameFx.setPosition(304-nameFx.getLocalBounds().width-2,60);
-	fonctionFx.setString(tabPlugin[pid].fx);
+	if(externe==0){
+		fonctionFx.setString(tabPlugin[pid].fx);
+	}else{
+		fonctionFx.setString("");
+	}
 	fonctionFx.setPosition(304-fonctionFx.getLocalBounds().width-2,102);
 	parametre pr;
 	id.setString("");
@@ -1051,12 +1143,18 @@ void Plugin::modifPlugin(int pid){
 		pr.min=tabPlugin[pid].param[i].min;
 		pr.max=tabPlugin[pid].param[i].max;
 		pr.adr=tabPlugin[pid].param[i].adr;
+		pr.mod=tabPlugin[pid].param[i].mod;
 		tabnparam.push_back(pr);
 	}
-	
 	idparam=tabnparam.size();
 	numid=0;
 	gesIndex(0);
 	drawPlugin(1,externe,"Modif plugin");
 	
+}
+int Plugin::getEditMode(){
+	return editMode;
+}
+void Plugin::setEditMode(int m){
+	editMode=m;
 }

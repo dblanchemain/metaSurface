@@ -1,3 +1,20 @@
+/* MetaSurface  .
+ *
+ * This is the main function for the MetaSurface.
+ *
+ * Copyright 2020-2021 dominique Blanchemain
+ *
+ *
+ * MetaSurface is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License along with this program;
+* If not, see http://www.gnu.org/licenses.
+*/
+
 #include <SFML/Graphics.hpp>
 #include <libgen.h>
 #include <sstream>
@@ -12,6 +29,7 @@
 #include <cstring>
 #include <boost/filesystem.hpp>
 #include <vector>
+#include <thread>
 
 #include <lo/lo.h>
 #include <lo/lo_cpp.h>
@@ -793,11 +811,6 @@ ifstream fichier(def->getFichierTheme(), ios::in);
 }
 
 metaSurface::~metaSurface(){
-}
-
-void metaSurface::initSurface(Configuration *def){
-  //std::cout << "surface Theme: " << def->getTheme()<<std::endl;
-  std::cout << "surface slider: " << surfaceSliderDroit.getOutlineThickness()<<std::endl;
 }
 
 
@@ -1727,6 +1740,7 @@ void metaSurface::eraseUsrPlugin(){
 void metaSurface::menuPreferences(){
   string rt=newParametres.drawParametres(ref->getDossierConfig(),ref->getAppGui(),ref->getFichierTheme(),ref->getDossierUser());
   if(rt=="ok"){
+  	ref->setDaw(newParametres.getDaw());
   	ref->setEditeur(newParametres.getEditeur());
   	ref->setNavigateur(newParametres.getNavigateur());
   	ref->setPort(newParametres.getPort());
@@ -1736,6 +1750,10 @@ void metaSurface::menuPreferences(){
   }
 }
 void metaSurface::menuSession(){
+	string s=ref->getDossierConfig();
+	char * cstr = new char [s.length()+1];
+   std::strcpy (cstr, s.c_str());
+   int ncwd=chdir(cstr);
 	int type=surfaceN.drawSurface(ref->getDossierConfig(),ref->getAppGui(),ref->getFichierTheme(),ref->getDossierUser());
   	string nameFile=surfaceN.selectReturnPath()+"/"+surfaceN.selectReturnFile();
   	std::cout <<"appGui "<<ref->getAppGui()<<" nameFile "<<nameFile<< std::endl;
@@ -1798,9 +1816,9 @@ void metaSurface::defGain(int pad, float gain){
 		string destination=ref->getServeur();
 		string portOsc=to_string(ref->getOSC());
 		string spv;
+		string spad;
+		lo::Address a(destination, portOsc);
 		if(tabPave[pad].getFlagDaw()==0){
-			string spad;
-			lo::Address a(destination, portOsc);
 			switch(modeDsp){
 				case 0:
 					if(pad<10){
@@ -1811,7 +1829,7 @@ void metaSurface::defGain(int pad, float gain){
 					cm="/padPlayer/Pad/p"+spad+to_string(pad);
 					break;
 				case 1:
-					cm="/padPlayer/0x00/0x00/v0/Player/0x00/0x00/gain";
+					cm="/padPlayer/0x00/0x00/Player/0x00/0x00/gain";
 					break;
 				case 2:
 					cm="/padPlayer/0x00/0x00/0x00/Player/0x00/0x00/gain";
@@ -1819,6 +1837,17 @@ void metaSurface::defGain(int pad, float gain){
 			a.send(cm, "f",gain);
 			std::cout <<"osc Loop "<<portOsc<<" "<<cm<<" f "<<gain<< std::endl;
 		}else if(ctrlOsc==1){
+			/*
+			if(tabPave[pad].getFile()!=""){
+				if(pad<10){
+					spad="0"+to_string(pad)+"/0x00/Player/Param/gain_";
+				}else{
+					spad=to_string(pad)+"/0x00/Player/Param/gain";
+				}
+				cm="/padPlayer/Pad/p"+spad+to_string(pad);
+			}
+			a.send(cm, "f",gain);
+			*/
 			lo::Address a(destination, portArdour);
 			gain=gain/tabPave[pad].getGainMax();
 			string cm="/strip/fader if "+to_string(tabPave[pad].getTrack())+" "+to_string(gain);
@@ -1940,25 +1969,46 @@ void metaSurface::updatePlugins(int pv, float rt){
 			if(tabPave[pv].idNameFx[i]!=""){
 				std::cout << "selectPad: " << selectPad-1<< "plugin: " << i<< "name: " << tabPave[pv].idNameFx[i]<< std::endl;
 				idnbfx=ls.find(tabPave[pv].idNameFx[i])->second;
-				std::cout << " tabPlugin nom: " << tabPlug[idnbfx].nomFx<< "  tabPlugin nbpar: " << tabPlug[idnbfx].nbpar<< std::endl;
+				std::cout << " tabPlugin nom: " << tabPlug[idnbfx].nomFx<< "  DistanceMax: " << tabPave[pv].getDistanceMax()<< std::endl;
 			
 				for(int j=0;j<tabPlug[idnbfx].nbpar;j++){
 					if(tabPave[pv].tabUsrPluginParam[i][j].etat==1){
 						param=((tabPave[pv].tabUsrPluginParam[i][j].max-tabPave[pv].tabUsrPluginParam[i][j].min)/tabPave[pv].getDistanceMax())*tabPave[pv].tabUsrPluginParam[i][j].scale;
 						if(tabPave[pv].tabUsrPluginParam[i][j].rev==0){
 							param=tabPave[pv].tabUsrPluginParam[i][j].max-(param*rt);
+							if(tabPave[pv].tabUsrPluginParam[i][j].mod==1){
+								param=param*(log10(tabPave[pv].getDistanceMax()/rt));
+							}
 						}else{
 							param=(param*rt)+tabPave[pv].tabUsrPluginParam[i][j].min;
+							if(tabPave[pv].tabUsrPluginParam[i][j].mod==1){
+								param=param/(log10(tabPave[pv].getDistanceMax()/rt));
+							}
+						}
+						if(param>tabPave[pv].tabUsrPluginParam[i][j].max){
+							param=tabPave[pv].tabUsrPluginParam[i][j].max;
+						}
+						if(param<tabPave[pv].tabUsrPluginParam[i][j].min){
+							param=tabPave[pv].tabUsrPluginParam[i][j].min;
 						}
 						if(tabPave[pv].getFlagDaw()==0){
 			        	   		lo::Address a(destination, portOsc);
 		       	 				switch(modeDsp){
 										case 0:
 											baseAdr="/padPlayer/Pad/p"+spv+"/0x00/0x00/"+tabPlug[idnbfx].param[j].adr;
+											if(tabPave[pv].idNameFx[i]=="Speed"){
+												baseAdr="/padPlayer/Pad/p"+spv+"/0x00/Player/Param/speed";
+												if(pv<10){
+													baseAdr=baseAdr+"_"+to_string(pv);
+												}else{
+													baseAdr=baseAdr+to_string(pv);
+												}
+												std::cout <<" nom "<<tabPave[pv].idNameFx[i]<<" speed ok "<<baseAdr<< std::endl;
+											}
 											a.send(baseAdr, "f",param);
 											break;
 										case 1:
-											baseAdr="/padPlayer/0x00/0x00/v0/0x00/0x00/"+tabPlug[idnbfx].param[j].adr;
+											baseAdr="/padPlayer/0x00/0x00/0x00/0x00/"+tabPlug[idnbfx].param[j].adr;
 											a.send(baseAdr, "f",param);
 											break;
 										case 2:
@@ -1973,15 +2023,32 @@ void metaSurface::updatePlugins(int pv, float rt){
 		    		 		}else if(ctrlOsc==1) {
 		  			 				lo::Address a(destination, portArdour);
 	 								int np=i+1;
-	 								cm=cmArdour+" iiif "+to_string(tabPave[pv].getTrack())+" "+to_string(np)+" "+to_string(tabPlug[idnbfx].param[j].id);
-						 			a.send(cmArdour, "iiif",tabPave[pv].getTrack(),np,tabPlug[idnbfx].param[j].id,param);
+	 								cm=cmArdour+" iiif "+to_string(tabPave[pv].getTrack())+" "+to_string(np)+" "+to_string(tabPlug[idnbfx].param[j].id+1);
+/*
+	 								float param2=((tabPave[pv].tabUsrPluginParam[i][j].max-tabPave[pv].tabUsrPluginParam[i][j].min)/tabPave[pv].getDistanceMax())*tabPave[pv].tabUsrPluginParam[i][j].scale;
+									if(tabPave[pv].tabUsrPluginParam[i][j].rev==0){
+										param2=(tabPave[pv].tabUsrPluginParam[i][j].max-(param2*rt))*(log10(130/rt));
+									}else{
+										param2=(param2*rt)+tabPave[pv].tabUsrPluginParam[i][j].min;
+									}
+									*/
+						 			a.send(cmArdour, "iiif",tabPave[pv].getTrack(),np,tabPlug[idnbfx].param[j].id+1,param);
 						 			}else{
 						 				lo::Address a(destination, portReaper);
 			  			 				int np=i+1;
-			  			 				cmReaper="/track/"+to_string(tabPave[pv].getTrack())+"/fx/"+to_string(np)+"/fxparam/"+to_string(tabPlug[idnbfx].param[j].id)+"/value";
+			  			 				cmReaper="/track/"+to_string(tabPave[pv].getTrack())+"/fx/"+to_string(np)+"/fxparam/"+to_string(tabPlug[idnbfx].param[j].id+1)+"/value";
+										float nbase;										
+										if(tabPlug[idnbfx].type!=2){									
+											nbase=1/((tabPave[pv].tabUsrPluginParam[i][j].max-tabPave[pv].tabUsrPluginParam[i][j].min)*tabPave[pv].tabUsrPluginParam[i][j].scale);
+											if(tabPave[pv].tabUsrPluginParam[i][j].min<0){
+												param=param-tabPave[pv].tabUsrPluginParam[i][j].min;
+											}
+											param=nbase*param;
+										}
 			  			 				a.send(cmReaper, "f", param);
+			  			 				std::cout << " tabPlugin nom: " << tabPlug[idnbfx].nomFx<< "  cm: " << cmReaper<< " param= " <<param<<" base "<<nbase<< std::endl;
 						 			}
-						std::cout << " tabPlugin nom: " << tabPlug[idnbfx].nomFx<< "  cm: " << cm<< "param= " <<param<< std::endl;
+						//std::cout << " tabPlugin nom: " << tabPlug[idnbfx].nomFx<< "  cm: " << cmReaper<< " param= " <<param<<" rt "<<rt<< std::endl;
 					}
 				}
 			}
@@ -2128,8 +2195,9 @@ void metaSurface::moveAnneau(int mobil){
 //																gestion des fichiers
 // ********************************************************************************************************************************
 void metaSurface::saveSurface(bool t){
-	char * cstr = new char [userConfig.length()+1];
-   std::strcpy (cstr, userConfig.c_str());
+	string s=userConfig+"/Pad";
+	char * cstr = new char [s.length()+1];
+   std::strcpy (cstr, s.c_str());
    int ncwd=chdir(cstr);
 	string nameFile;
 	string wfile;
@@ -2230,6 +2298,19 @@ void metaSurface::saveSurface(bool t){
    	}
    	
    fichier.close();
+   char commande[255];
+	string rcFile=".padPlayer-rc";
+	char * cstr = new char [rcFile.length()+1];
+	std::strcpy (cstr, rcFile.c_str());
+	char* home = getenv("HOME");
+	char orig[255];
+	snprintf(orig, 255, "%s/%s", home,cstr);
+	nameFile=nameFile.substr(0,nameFile.length()-4);
+	wfile=path+"/."+nameFile+"-rc";
+	char * dest = new char [wfile.length()+1];
+	std::strcpy (dest, wfile.c_str());
+	snprintf(commande, 255, "%s %s %s ", "cp",orig,dest);
+	int pd=system(commande);
 	}else{  // sinon
      cerr << "Erreur à l'ouverture du fichier!" << endl;
 	} 
@@ -2249,14 +2330,31 @@ const vector<string> metaSurface::explode(const string& s, const char& c){
 	return v;
 }
 void metaSurface::openSurface(){
-	char * cstr = new char [userConfig.length()+1];
-   std::strcpy (cstr, userConfig.c_str());
+	string s=userConfig+"/Pad";
+	char * cstr = new char [s.length()+1];
+   std::strcpy (cstr, s.c_str());
    int ncwd=chdir(cstr);
 	string nameFile;
 	fileSelector.initSelector(getcwd(NULL,0));
 	nameFile=fileSelector.selector();
-	std::cout <<"path "<<getcwd(NULL,0)<<" nameFile "<< nameFile<< std::endl;
+	std::cout <<"path "<<fileSelector.getPath()<<" nameFile "<< nameFile<< std::endl;
 	chargeSurface(nameFile);
+	
+	char commande[255];
+	string destFile=".padPlayer-rc";
+	char * cs = new char [destFile.length()+1];
+	std::strcpy (cs, destFile.c_str());
+	char* home = getenv("HOME");
+	char dest[255];
+	snprintf(dest, 255, "%s/%s", home,cs);
+	
+	nameFile=nameFile.substr(0,nameFile.length()-4);
+	string wfile=fileSelector.getPath()+"/."+nameFile+"-rc";
+	char * orig = new char [wfile.length()+1];
+	std::strcpy (orig, wfile.c_str());
+	snprintf(commande, 255, "%s %s %s ", "cp",orig,dest);
+	std::cout <<"commande "<<commande<< std::endl;
+	int pd=system(commande);
 }
 void metaSurface::chargeSurface(string nameFile){	
    string path=getcwd(NULL,0);
@@ -2302,7 +2400,7 @@ void metaSurface::chargeSurface(string nameFile){
   			}
   			
   			if(pf[0]=="pathBkgFile"){
-	  			pathBkgFile=pf[1];
+	  			pathBkgFile=userConfig+"/surfacesBkg";
 	  			pf[1]="";
   			}
   			if(pf[0]=="surfaceWidth"){
@@ -2511,7 +2609,7 @@ void metaSurface::sessionCreateSurface(int id){
 	nscale=1;
 	surface.setSize(sf::Vector2u(920,754));
 	defSurface.setTextureRect(sf::IntRect(0, 0, surfaceN.getSwidth(), surfaceN.getSheight()));
-	adr << std::fixed <<ref->getDossierUser()<<"/surfacesBkg/"<<nameBkgFile;
+	adr << std::fixed <<pathBkgFile<<"/"<<nameBkgFile;
 	selectST.loadFromFile(adr.str());
 	defSurface.setTexture(selectST);
 	adr.clear();
@@ -2663,8 +2761,13 @@ void metaSurface::onClickWinPave(sf::Event e){
    stringstream adr;
    if(e.mouseButton.x>64 && e.mouseButton.x<214 && e.mouseButton.y>11 && e.mouseButton.y<41){
    	string path=getcwd(NULL,0);
+   	//string s=userConfig+"/sounds";
+   	string s=path;
+	   //char * cstr = new char [s.length()+1];
+      //std::strcpy (cstr, s.c_str());
+      //int ncwd=chdir(cstr);
    	SF_INFO sfinfo;
-		fileSelector.initSelector(path);
+		fileSelector.initSelector(s);
 		string rtf2=fileSelector.selector();
 		path=getcwd(NULL,0);
 		tabPave[selectPad-1].setPath(path);
@@ -2688,6 +2791,7 @@ void metaSurface::onClickWinPave(sf::Event e){
       paramDuree.setPosition(296-paramDuree.getLocalBounds().width-4,100);
       
    }
+   
    if(e.mouseButton.x>114 && e.mouseButton.x<130 && e.mouseButton.y>70 && e.mouseButton.y<82){
 	 	bool p=tabPave[selectPad-1].getFlagDaw();
 	   if(p==1){
@@ -2803,7 +2907,28 @@ void metaSurface::onClickWinPave(sf::Event e){
    	winPaveCurseur.setPosition(277,139);
 	 	flagPaveCurseur=1;
 	 	apptxt="";
+	 	paramTrack.setString("");
 	 	clockCurseur.restart();
+   }
+   if(e.mouseButton.x>282 && e.mouseButton.x<294 && e.mouseButton.y>136 && e.mouseButton.y<146){
+   	string s=paramTrack.getString();
+   	int tk=stoi(s);
+   	tk=tk+1;
+   	if(tk>64){
+   		tk=64;
+   	}
+   	tabPave[selectPad-1].setTrack(tk);
+   	paramTrack.setString(to_string(tk));
+   }
+   if(e.mouseButton.x>282 && e.mouseButton.x<294 && e.mouseButton.y>146 && e.mouseButton.y<156){
+   	string s=paramTrack.getString();
+   	int tk=stoi(s);
+   	tk=tk-1;
+   	if(tk<0){
+   		tk=0;
+   	}
+   	tabPave[selectPad-1].setTrack(tk);
+   	paramTrack.setString(to_string(tk));
    }
    if(e.mouseButton.x>260 && e.mouseButton.x<274 && e.mouseButton.y>170 && e.mouseButton.y<185){
 	 	bool p=tabPave[selectPad-1].getFx();
@@ -2839,9 +2964,19 @@ void metaSurface::onClickWinPave(sf::Event e){
 	 	paveValider();
 	  	winPave.close();
 	}
-	if(e.mouseButton.x>275 && e.mouseButton.x<294 && e.mouseButton.y>16 && e.mouseButton.y<36){
+	if(e.mouseButton.x>278 && e.mouseButton.x<296 && e.mouseButton.y>8 && e.mouseButton.y<28){
 	 	testFileDSP("");
 	}
+	if(e.mouseButton.x>278 && e.mouseButton.x<296 && e.mouseButton.y>32 && e.mouseButton.y<52){
+   	tabPave[selectPad-1].setFile("");
+   	paramFile.setString("");
+   	tabPave[selectPad-1].setNbCanaux(0);
+   	paramCanaux.setString("0");
+      paramCanaux.setPosition(296-paramCanaux.getLocalBounds().width-4,65);
+      tabPave[selectPad-1].setDuree(0);
+      paramDuree.setString("0");
+      paramDuree.setPosition(296-paramDuree.getLocalBounds().width-4,100);
+   }
 	if(e.mouseButton.x>114 && e.mouseButton.x<130 && e.mouseButton.y>172 && e.mouseButton.y<188){
 	 	if(tabPave[selectPad-1].getMixgain()==1){
 	 		tabPave[selectPad-1].setMixgain(0);
@@ -3173,6 +3308,7 @@ void metaSurface::onClickWinFx(sf::Event e){
 			 for(int i=0;i<tabPlug[idnbfx].nbpar;i++){
 			 	pvparplug.min=tabPlug[idnbfx].param[i].min;
 			 	pvparplug.max=tabPlug[idnbfx].param[i].max;
+			 	pvparplug.mod=tabPlug[idnbfx].param[i].mod;
 			 	tabPave[selectPad-1].tabUsrPluginParam[chaineFxSelect].push_back(pvparplug);
 			 	std::cout <<"min "<<tabPave[selectPad-1].tabUsrPluginParam[chaineFxSelect][i].min<< std::endl;
 			 }
@@ -3194,7 +3330,8 @@ void metaSurface::onClickWinFx(sf::Event e){
   		ContraintesFx ctrlFx(ref);
   		std::cout << "selectPad: " << selectPad-1<< "plugin: " << plugin<< " name: " << tabPave[selectPad-1].idNameFx[plugin]<<" tabPlug.size "<<tabPlug[idnbfx].nbpar<< std::endl;
   		if(tabPlug[idnbfx].nbpar>0){
-   		ctrlFx.drawContraintesFx(newPlugin,idnbfx,&tabPave[selectPad-1], plugin);
+   		ctrlFx.drawContraintesFx(newPlugin,idnbfx,&tabPave[selectPad-1], plugin,newPlugin.getEditMode());
+   		newPlugin.setEditMode(0);
    		std::cout << "selectPad: " << selectPad-1<< "plugin: " << plugin<< "name: " << tabPave[selectPad-1].idNameFx[plugin]<< std::endl;
    		for(int i=0;i<tabPlug[idnbfx].nbpar;i++){
    		std::cout << "tabPave[selectPad-1].tabPluginParam[plugin].etat"<<tabPave[selectPad-1].tabUsrPluginParam[plugin][i].etat<< std::endl;
@@ -3227,7 +3364,7 @@ void metaSurface::onClickWinFx(sf::Event e){
      tabPave[selectPad-1].rtfx=0;
      winFX.close();
    }
-   if(e.mouseButton.x>10 && e.mouseButton.x<42 && e.mouseButton.y>444 && e.mouseButton.y<472){
+   if(e.mouseButton.x>19 && e.mouseButton.x<50 && e.mouseButton.y>444 && e.mouseButton.y<472){
      for(int i=0;i<12;i++){
      		tabPave[selectPad-1].idfx[i]=0;
      		txtFx[i].setString("");
@@ -3304,7 +3441,7 @@ bool metaSurface::testFileDSP(string st1){
   sf_close(sndfile) ;
   cout <<path <<" canaux : " << sfinfo.channels<<" Sample rate = "<< sfinfo.samplerate<<" frames : "<<sfinfo.frames<< endl;
   string nameFile="simplePlayer.dsp";
-  if(sfinfo.channels){
+  if(sfinfo.channels>1){
   string prog;
   prog=prog+"import(\"stdfaust.lib\");";
   prog=prog+"import(\"soundfiles.lib\");";
@@ -3326,7 +3463,8 @@ bool metaSurface::testFileDSP(string st1){
   createDSP(prog, st1);
   }
 }
-bool metaSurface::createDSP(std::string localDsp, string st1){
+
+void metaSurface::createDSP(std::string localDsp, string st1){
   char name[256];
   char nameAudio[256];
   char rcfilename[256];
@@ -3413,10 +3551,9 @@ bool metaSurface::createDSP(std::string localDsp, string st1){
   delete soundinterface;
   
   deleteDSPFactory(static_cast<llvm_dsp_factory*>(factory));
-  
-  return 0;
+
 }
-bool metaSurface::testFxDSP(string st1){
+void metaSurface::testFxDSP(string st1){
   int nbcanaux=tabPave[selectPad-1].getNbCanaux();
   string sFileName=tabPave[selectPad-1].getPath()+"/"+tabPave[selectPad-1].getFile();
   const char *path=sFileName.c_str();
@@ -3444,12 +3581,12 @@ bool metaSurface::testFxDSP(string st1){
   			 lstPlugins.insert(std::pair<string, string>(tabPave[selectPad-1].idNameFx[i],tabPlug[idnbfx].fx));
   		}	
   }
-  if(nbcanaux>0 && nbfx>0){
+  if(nbcanaux>1 && nbfx>0){
 	  string prog;
 	  
-	  prog=prog+"import(\"stdfaust.lib\");\n";
-	  prog=prog+"import(\"soundfiles.lib\");\n";
-	  prog=prog+"import(\""+ref->getDossierConfig()+"/metaSurfaceFaust.lib\");\n";
+	  prog=prog+"import(\""+ref->getDossierConfig()+"/faust/stdfaust.lib\");\n";
+	  prog=prog+"import(\""+ref->getDossierConfig()+"/faust/soundfiles.lib\");\n";
+	  prog=prog+"import(\""+ref->getDossierConfig()+"/faust/metaSurfaceFaust.lib\");\n";
 	  std::map<string, string>::iterator it;
 	  for(it=lstPlugins.begin();it!=lstPlugins.end();it++){
 	  		 prog=prog+"import(\""+ref->getDossierUser()+"/Plugins/"+it->first+".lib\");\n";
@@ -3467,7 +3604,9 @@ bool metaSurface::testFxDSP(string st1){
 	  prog=prog+"lect(x)=lect2(hgroup(\"[2]\",x));\n";
 	  prog=prog+"lgain=tdec(sgain);\n";
 	  prog=prog+"lspeed=tdec(sspeed);\n";
-	  prog=prog+"lmet=lect(par(j,"+to_string(nbcanaux)+",hgroup(\"\",vmeter(j))));\n";
+
+	  prog=prog+"lmet=lect(par(j,"+to_string(nbcanaux)+",hgroup(\"\",vmeter(j))));\n";  
+	  
 	  int k=0;
 	  int di=0;
 	  if(tabPave[selectPad-1].fxcanal==0){
@@ -3623,11 +3762,16 @@ bool metaSurface::testFxDSP(string st1){
 	  cout <<" canaux : " << nbcanaux<<" nbfx : "<<nbfx<<" path : " << path<< endl;
 	  cout <<" dsp : " << prog<< endl;
 	  
-	  //createDSP(prog,"");
+	  std::thread t(&metaSurface::createDSP,this,prog,"-osc");
+	  t.detach();
+	  /*
 	  string player=ref->getDossierConfig()+"/padPlayer" ;
 		char commande[255];
 		string nameFile="padPlayer.dsp";
-	   string path=getcwd(NULL,0); 
+	   string cdir=ref->getDossierConfig();
+	   char * cstr = new char [cdir.length()+1];
+  	   std::strcpy (cstr, cdir.c_str());
+  	   int ncwd=chdir(cstr); 
 	   ofstream fichier(nameFile, ios::out | ios::trunc);	
 	   if(fichier){
 	   	fichier<<prog<<endl;
@@ -3648,6 +3792,7 @@ bool metaSurface::testFxDSP(string st1){
 		snprintf(commande, 255, "%s %s %s %s %s %s/%s &", pl,"-osc",nosc,"-xmit",nmit,getcwd(NULL,0), ns);
 		std::cout << "player dsp: " << commande << std::endl;
 		int pd=system(commande);
+		*/
    }
 }
 
@@ -3662,6 +3807,7 @@ void metaSurface::genDSP(string port, string mitx){
 	int dfpart=0;
 	string nameFile="padPlayer.dsp";
 	string path=getcwd(NULL,0);
+	
 	for(int k=0;k<surfaceTypeDef;k++){
 		tabPave[k].nbfx=0;
 		if(tabPave[k].getNbCanaux()>nbCanauxMax){
@@ -3673,208 +3819,208 @@ void metaSurface::genDSP(string port, string mitx){
 			}
 		}
 	}
-	//nbCanauxT.setString(to_string(nbCanauxMax));
 	nbcanaux=nbCanauxMax;
 	nbsorties=nbcanaux;
 	std::map<string, int> ls=newPlugin.getListPlugin();
 	std::vector<Plugin::plugin> tabPlug=newPlugin.getTabPlugin();
 	int nbctrl=0;
 	int idnbfx;
-	
    map<string,string> lstPlugins;
-  
-   for(int i=0;i<12;i++){
-  		int idnbfx=ls.find(tabPave[selectPad-1].idNameFx[i])->second;
-  		if(tabPave[selectPad-1].idNameFx[i]!="" && tabPlug[idnbfx].type==1){
-  			 cout <<" plugin : " << tabPave[selectPad-1].idNameFx[i]<<" type : "<<tabPlug[idnbfx].type<< endl;
-  			 lstPlugins.insert(std::pair<string, string>(tabPave[selectPad-1].idNameFx[i],tabPlug[idnbfx].fx));
-  		}	
-   }	
-	
-	if(nbsorties!=0){
-		ofstream fichier(nameFile, ios::out | ios::trunc);	
-	   if(fichier){ 
-			fichier<<"import(\"stdfaust.lib\");"<<endl;
-		   fichier<<"import(\"soundfiles.lib\");"<<endl;
-		   fichier<<"import(\"/home/dominique/Compile/CodeBlocks/metaSurfaces/metaSurfaceFaust.lib\");"<<endl;
-		   std::map<string, string>::iterator it;
-	  		for(it=lstPlugins.begin();it!=lstPlugins.end();it++){
-	  		 	fichier<<"import(\""<<ref->getDossierUser()<<"/Plugins/"<<it->first<<".lib\");\n";
-	 		}
-		   
-		   nfx="ds=soundfile(\"[url:{";
-		   for(int i=0;i<surfaceTypeDef;i++){
-		   	if(tabPave[i].getFile()==""){
-		   		nfx=nfx+"\'\';";
-		   	}else{
-		   		nfx=nfx+"\'"+tabPave[i].getPath()+"/"+tabPave[i].getFile()+"\';";
-		   	}
-		   }
-		   nfx=nfx.substr(0,nfx.length()-1);
-		   nfx=nfx+"}]\","+to_string(nbcanaux)+");\n";
-		   fichier<<nfx<<endl;
-			fichier<<"vmeter(i,x)= attach(x, envelop(x) : vbargraph(\"%2i[unit:dB]\", -70, +5));"<<endl;
-			fichier<<"envelop = abs : max ~ -(1.0/ma.SR) : max(ba.db2linear(-70)) : ba.linear2db;"<<endl;
-			fichier<<"sample(x) = so.sound(ds, x);"<<endl;
-			fichier<<"sgain(i) = vslider(\"[0]gain%2i\",0.1,0,2,0.01) : si.smoo;"<<endl;
-			fichier<<"sspeed(i)=vslider(\"[1]speed%2i\",1.0,0,2,0.01) : si.smoo;"<<endl;
-			fichier<<"lect2(x)=hgroup(\"Player\",x);"<<endl;
-		
-			fichier<<"tdec(x)=lect2(hgroup(\"[0]Param\",x));"<<endl;
-			fichier<<"lect(x)=lect2(hgroup(\"[1]Meter\",x));"<<endl;
-		
-			fichier<<"lgain(i)=tdec(sgain(i));"<<endl;
-			fichier<<"lspeed(i)=tdec(sspeed(i));"<<endl;
-			fichier<<"lmet=lect(par(j,"+to_string(nbsorties)+",vmeter(j)));"<<endl;
-		   if(ctrlFX==0){
-				fichier<<"base=par(i,16,tgroup(\"Pad\",hgroup(\"[0] p%2i\",sample(i).loop_speed_level(lspeed(i),lgain(i)):lmet:>/(16))));"<<endl;
-			}else{
-	
-				prog=prog+"base=tgroup(\"Pad\",";
-		      for(int k=0;k<surfaceTypeDef;k++){
-		      	if(tabPave[k].getFlagDaw()==0){
-		      	dfpart=0;
-			      nfx="";
-					   if(tabPave[k].nbfx<=5){ 	
-						   	prog=prog+"hgroup(\"p";
-			      			if(k<10){
-			      				prog=prog+"0";
-			      			}
-						   	prog=prog+to_string(k)+"\",hgroup(\"[0]\",sample("+to_string(k)+").loop_speed_level(lspeed("+to_string(k)+"),lgain("+to_string(k)+")):lmet";  
-						   	if(tabPave[k].nbfx==1 && tabPave[k].idNameFx[0]=="Speed"){
-			      				nbctrl=0;
-							   }else{
-							   	nbctrl=tabPave[k].nbfx;
-							   }		      					      
-						      if(nbctrl>0){
-						      	prog=prog+":par(j,"+to_string(nbcanaux)+",";
-						      }
-						  	   for(int i=0;i<12;i++){
-							  	 	  if(tabPave[k].idNameFx[i]!="" && tabPave[k].idNameFx[i]!="Speed"){
-							  	 		  if(tabPave[k].idNameFx[i]=="Mixer"){
-							  	 			  nfx=nfx+"hgroup(\"["+to_string(i)+"]MIXER\",mixer(j)):";
-							  	 			  dfpart++;
-							  	 		  }else{
-							  	 		  	  idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
-							  	 			  nfx=nfx+"hgroup(\"["+to_string(i)+"]\","+tabPlug[idnbfx].fx+"):";
-							  	 			  dfpart++;
-							  	 		  }
-							  	 	  }
-						  	   }
-						  	   if(nfx.length()>0){
-						  	   	nfx=nfx.substr(0,nfx.length()-1);
-						  	   	prog=prog+nfx+")";
-						  	   }
-								
-							  	if(tabPave[k].getFlagMulticanaux()==0){
-							  	  prog=prog+"):>_),\n";
-						  	   }else{
-						  	     prog=prog+"):>";
-						  	     //for(int c=0;c<nbsorties;c++){
-						  	     for(int c=0;c<tabPave[k].getNbCanaux();c++){	
-						  	    	 prog=prog+"_,";
-						  	     }
-						  	     prog=prog.substr(0,prog.length()-1);
-						  	     prog=prog+"),\n";
-						  	   }
-						  
-				  	   }else{
-				  	   	dfpart=0;
-				  	   	prog=prog+"vgroup(\"p";
-		      			if(k<10){
-		      				prog=prog+"0";
-		      			}
-					   	prog=prog+to_string(k)+"\",hgroup(\"[0]\",sample("+to_string(k)+").loop_speed_level(lspeed("+to_string(k)+"),lgain("+to_string(k)+")):lmet";  
-				      	nfx="";
-							if(tabPave[k].nbfx>0){
-							   prog=prog+":par(j,"+to_string(nbcanaux)+",";
-							}		
-					  	   for(int i=0;i<12;i++){
-					  	   	if(dfpart<=4){
-						  	 	  if(tabPave[k].idNameFx[i]!="" && tabPave[k].idNameFx[i]!="Speed"){
-						  	 		  if(tabPave[k].idNameFx[i]=="Mixer"){
-						  	 			  nfx=nfx+"hgroup(\"["+to_string(i)+"]MIXER\",mixer(j)):";
-						  	 		  }else{
-						  	 		  	  idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
-							  	 		  nfx=nfx+"hgroup(\"["+to_string(i)+"]\","+tabPlug[idnbfx].fx+"):";
-						  	 		  }
-						  	 		  
-						  	 	  }
-						  	 	  dfpart++;
-						  	 	}
-					  	   }
-					  	   nfx=nfx.substr(0,nfx.length()-1);
-					  	   prog=prog+nfx;
-					  	   nfx="";
-					  	   if(tabPave[k].nbfx>5 && tabPave[k].idNameFx[5]=="Speed"){
-			      			nbctrl=0;
-							}else{
-							  	nbctrl=tabPave[k].nbfx;
-							}
-							if(nbctrl>0){
-				  	   	prog=prog+")):hgroup(\"[1]\",par(j,"+to_string(nbcanaux)+",";
-				  	   	}
-							for(int i=dfpart;i<12;i++){	
-				  	   		if(tabPave[k].idNameFx[i]!="" && tabPave[k].idNameFx[i]!="Speed"){
-					  	 		  if(tabPave[k].idNameFx[i]=="Mixer"){
-					  	 			  nfx=nfx+"hgroup(\"["+to_string(i)+"]MIXER\",mixer(j)):";
-					  	 		  }else{
-					  	 			  idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
-							  	 	  nfx=nfx+"hgroup(\"["+to_string(i)+"]\","+tabPlug[idnbfx].fx+"):";
-					  	 		  }
-					  	 		  
-					  	 	   }
-					  	   }
-					  	   if(nfx.length()>0){
-					  	   nfx=nfx.substr(0,nfx.length()-1);
-					  	   prog=prog+nfx;
-					  	   }
-					  	   if(tabPave[k].getFlagMulticanaux()==0){
-						  	 	prog=prog+")):>_),\n";
-					  	    }else{
-					  	    	prog=prog+"):";
-					  	    	for(int c=0;c<tabPave[k].getNbCanaux();c++){
-					  	    		prog=prog+"_,";
-					  	    	}
-					  	    	prog=prog.substr(0,prog.length()-1);
-					  	    	prog=prog+")),\n";
-					  	    }
-					  	   
-					  	   //prog=prog+")):>_),\n";
-				  	   }
-				  	}
-				  	}
-			  	   prog=prog.substr(0,prog.length()-2);
-			  	   fichier<<prog<<");"<<endl;
-			  	   
-			  	   fichier<<"smp1=vgroup(\"[0]\",base);"<<endl;
-			  	   
-				}  	   
-				
-			fichier<<"process = smp1;"<<endl;
-			fichier.close();
-			}
-		//createDSP(prog, "-osc");
-		
-		string player=ref->getDossierConfig()+"/padPlayer" ;
-		char commande[255];
-		char* ns = new char [nameFile.length()+1];
-		std::strcpy (ns, nameFile.c_str());
-		char* pl = new char [player.length()+1];
-		std::strcpy (pl, player.c_str());
-		char* nosc = new char [port.length()+1];
-		std::strcpy (nosc, port.c_str());
-		char* nmit = new char [mitx.length()+1];
-		std::strcpy (nmit, mitx.c_str());
-		snprintf(commande, 255, "%s %s %s %s %s %s/%s &", pl,"-osc",nosc,"-xmit",nmit,getcwd(NULL,0), ns);
-		std::cout << "player dsp: " << commande << std::endl;
-		int pd=system(commande);
-		std::cout << "pid : " << pd << std::endl;
-	}else{
-		newInfo.setTxtPosY(0, 30);
-		newInfo.setTxt(0,"Attention");
-		newInfo.setTxtPosY(1, 70);
-		newInfo.setTxt(1,"Aucun fichier audio.");
-		bool rt=newInfo.drawInfo(0, "Alerte");
+   for(int j=0;j<surfaceTypeDef;j++){
+	   for(int i=0;i<12;i++){
+	  		int idnbfx=ls.find(tabPave[j].idNameFx[i])->second;
+	  		if(tabPave[j].idNameFx[i]!="" && tabPlug[idnbfx].type==1){
+	  			 cout <<" plugin : " << tabPave[j].idNameFx[i]<<" type : "<<tabPlug[idnbfx].type<< endl;
+	  			 lstPlugins.insert(std::pair<string, string>(tabPave[j].idNameFx[i],tabPlug[idnbfx].fx));
+	  		}	
+	   }	
+   }
+   
+   prog=prog+"import(\""+ref->getDossierConfig()+"/faust/stdfaust.lib\");";
+	prog=prog+"import(\""+ref->getDossierConfig()+"/faust/soundfiles.lib\");";
+	prog=prog+"import(\""+ref->getDossierConfig()+"/faust/metaSurfaceFaust.lib\");";
+	std::map<string, string>::iterator it;
+  	for(it=lstPlugins.begin();it!=lstPlugins.end();it++){
+  		 prog=prog+"import(\""+ref->getDossierUser()+"/Plugins/"+it->first+".lib\");\n";
+ 	}
+	   
+	nfx="ds=soundfile(\"[url:{";
+	for(int i=0;i<surfaceTypeDef;i++){
+	   if(tabPave[i].getFile()==""){
+	   	nfx=nfx+"\'"+ref->getDossierConfig()+"/sound/vide.wav\';";
+	   }else{
+	   	nfx=nfx+"\'"+tabPave[i].getPath()+"/"+tabPave[i].getFile()+"\';";
+	   }
 	}
+	nfx=nfx.substr(0,nfx.length()-1);
+	nfx=nfx+"}]\","+to_string(nbcanaux)+");\n";
+	prog=prog+nfx;
+	prog=prog+"vmeter(i,x)= attach(x, envelop(x) : vbargraph(\"%2i[unit:dB]\", -70, +5));";
+	prog=prog+"envelop = abs : max ~ -(1.0/ma.SR) : max(ba.db2linear(-70)) : ba.linear2db;";
+	prog=prog+"sample(x) = so.sound(ds, x);";
+	prog=prog+"sgain(i) = vslider(\"[0]gain%2i\",0.1,0,2,0.01) : si.smoo;";
+	prog=prog+"ingain(i) = vslider(\"[0]gain%2i\",0.1,0,2,0.01) : si.smoo;";
+	prog=prog+"sspeed(i)=vslider(\"[1]speed%2i\",1.0,0,2,0.01) : si.smoo;";
+	prog=prog+"lect2(x)=hgroup(\"Player\",x);";
+	
+	prog=prog+"tdec(x)=lect2(hgroup(\"[0]Param\",x));";
+	prog=prog+"lect(x)=lect2(hgroup(\"[1]Meter\",x));";
+	
+	prog=prog+"lgain(i)=tdec(sgain(i));";
+	prog=prog+"lgainp(i)=tdec(ingain(i));";
+	prog=prog+"lspeed(i)=tdec(sspeed(i));";
+	if(nbsorties==0){
+		prog=prog+"lmet=lect(vmeter(1));";
+		nbcanaux=1;
+	}else{
+		prog=prog+"lmet=lect(par(j,"+to_string(nbsorties)+",vmeter(j)));";
+	}   
+	prog=prog+"base=tgroup(\"Pad\",";
+   for(int k=0;k<surfaceTypeDef;k++){
+   	int nbc;
+  	      if(tabPave[k].getFile()==""){
+			nbc=2;
+	   }else{
+	  		nbc=tabPave[k].getNbCanaux();
+	   }
+   	dfpart=0;
+      nfx="";
+		   if(tabPave[k].nbfx<=5){ 	
+			   	prog=prog+"hgroup(\"p";
+      			if(k<10){
+      				prog=prog+"0";
+      			}
+      			if(tabPave[k].getFile()==""){
+			   	prog=prog+to_string(k)+"\",hgroup(\"[0]\",_:*(lgainp("+to_string(k)+"))<:lmet";  
+					}else{
+						prog=prog+to_string(k)+"\",hgroup(\"[0]\",sample("+to_string(k)+").loop_speed_level(lspeed("+to_string(k)+"),lgain("+to_string(k)+")):lmet";  
+					}						   	
+			   	if(tabPave[k].nbfx==1 && tabPave[k].idNameFx[0]=="Speed"){
+      				nbctrl=0;
+				   }else{
+				   	nbctrl=tabPave[k].nbfx;
+				   }		      					      
+			      if(nbctrl>0){
+			      	prog=prog+":par(j,"+to_string(nbcanaux)+",";
+			      }
+			  	   for(int i=0;i<12;i++){
+			  	   	idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
+			  	   	if(tabPlug[idnbfx].type<2){
+				  	 	  if(tabPave[k].idNameFx[i]!="" && tabPave[k].idNameFx[i]!="Speed"){
+				  	 		  if(tabPave[k].idNameFx[i]=="Mixer"){
+				  	 			  nfx=nfx+"hgroup(\"["+to_string(i)+"]MIXER\",mixer(j)):";
+				  	 			  dfpart++;
+				  	 		  }else{
+				  	 		  	  idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
+				  	 			  nfx=nfx+"hgroup(\"["+to_string(i)+"]\","+tabPlug[idnbfx].fx+"):";
+				  	 			  dfpart++;
+				  	 		  }
+				  	 	  }
+				  	 	}
+			  	   }
+			  	   if(nfx.length()>0){
+			  	   	nfx=nfx.substr(0,nfx.length()-1);
+			  	   	prog=prog+nfx+")";
+			  	   }
+				  	if(tabPave[k].getFlagMulticanaux()==0){
+				  	  prog=prog+"):>_),\n";
+			  	   }else{
+			  	     prog=prog+"):>";
+			  	     
+			  	     for(int c=0;c<nbsorties;c++){	
+			  	    	 prog=prog+"_,";
+			  	     }
+			  	     prog=prog.substr(0,prog.length()-1);
+			  	     prog=prog+"),\n";
+			  	   }
+			  
+	  	   }else{
+	  	   	dfpart=0;
+	  	   	prog=prog+"vgroup(\"p";
+   			if(k<10){
+   				prog=prog+"0";
+   			}
+		   	if(tabPave[k].getFile()==""){
+			   	prog=prog+to_string(k)+"\",hgroup(\"[0]\",_:*(lgainp("+to_string(k)+"))<:lmet";  
+				}else{
+					prog=prog+to_string(k)+"\",hgroup(\"[0]\",sample("+to_string(k)+").loop_speed_level(lspeed("+to_string(k)+"),lgain("+to_string(k)+")):lmet";  
+				}	
+	      	nfx="";
+				if(tabPave[k].nbfx>0){
+				   prog=prog+":par(j,"+to_string(nbcanaux)+",";
+				}		
+		  	   for(int i=0;i<12;i++){
+		  	   	if(dfpart<=4){
+		  	   	  idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
+			  	     if(tabPlug[idnbfx].type<2){
+				  	 	  if(tabPave[k].idNameFx[i]!="" && tabPave[k].idNameFx[i]!="Speed"){
+				  	 		  if(tabPave[k].idNameFx[i]=="Mixer"){
+				  	 			  nfx=nfx+"hgroup(\"["+to_string(i)+"]MIXER\",mixer(j)):";
+				  	 		  }else{
+				  	 		  	  idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
+					  	 		  nfx=nfx+"hgroup(\"["+to_string(i)+"]\","+tabPlug[idnbfx].fx+"):";
+				  	 		  }
+				  	 		  
+				  	 	  }
+				  	 }
+			  	 	  dfpart++;
+			  	 	}
+		  	   }
+		  	   nfx=nfx.substr(0,nfx.length()-1);
+		  	   prog=prog+nfx;
+		  	   nfx="";
+		  	   if(tabPave[k].nbfx>5 && tabPave[k].idNameFx[5]=="Speed"){
+      			nbctrl=0;
+				}else{
+				  	nbctrl=tabPave[k].nbfx;
+				}
+				if(nbctrl>0){
+	  	   	prog=prog+")):hgroup(\"[1]\",par(j,"+to_string(nbcanaux)+",";
+	  	   	}
+				for(int i=dfpart;i<12;i++){
+					idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
+			  	   if(tabPlug[idnbfx].type<2){
+		  	   		if(tabPave[k].idNameFx[i]!="" && tabPave[k].idNameFx[i]!="Speed"){
+			  	 		  if(tabPave[k].idNameFx[i]=="Mixer"){
+			  	 			  nfx=nfx+"hgroup(\"["+to_string(i)+"]MIXER\",mixer(j)):";
+			  	 		  }else{
+			  	 			  idnbfx=ls.find(tabPave[k].idNameFx[i])->second;
+					  	 	  nfx=nfx+"hgroup(\"["+to_string(i)+"]\","+tabPlug[idnbfx].fx+"):";
+			  	 		  }
+			  	 		  
+			  	 	   }
+			  	 	}
+		  	   }
+		  	   if(nfx.length()>0){
+		  	   nfx=nfx.substr(0,nfx.length()-1);
+		  	   prog=prog+nfx;
+		  	   }
+
+		  	   if(tabPave[k].getFlagMulticanaux()==0){
+			  	 	prog=prog+")):>_),\n";
+		  	    }else{
+		  	    	prog=prog+"):";
+		  	    	
+		  	     for(int c=0;c<nbsorties;c++){	
+		  	    	 prog=prog+"_,";
+		  	     }
+		  	    	prog=prog.substr(0,prog.length()-1);
+		  	    	prog=prog+")),\n";
+		  	    }
+		  	   
+		  	   //prog=prog+")):>_),\n";
+	  	   }
+	  	
+	  	}
+  	   prog=prog.substr(0,prog.length()-2);
+  	   prog=prog+");";
+  	   
+  	   prog=prog+"smp1=vgroup(\"[0]\",base);";
+  	   	   
+			
+		prog=prog+"process = smp1;";
+		
+	std::cout << "prog : " << prog << std::endl;
+	std::thread t(&metaSurface::createDSP,this,prog,"-osc");
+	t.detach();	
 }

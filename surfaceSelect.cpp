@@ -1,3 +1,19 @@
+/* MetaSurface  .
+ *
+ * this file is part of the MetaSurface application
+ *
+ * Copyright 2020-2021 dominique Blanchemain
+ *
+ *
+ * MetaSurface is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License along with this program;
+* If not, see http://www.gnu.org/licenses.
+*/
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include <iostream>
@@ -178,52 +194,52 @@ void surfaceSelect::onClick(sf::Event e){
 */
    }
    if(e.mouseButton.x>9 && e.mouseButton.x<136 && e.mouseButton.y>9 && e.mouseButton.y<136){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta9.msf";
    }
    if(e.mouseButton.x>148 && e.mouseButton.x<274 && e.mouseButton.y>24 && e.mouseButton.y<120){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta12.msf";
    }
    if(e.mouseButton.x>286 && e.mouseButton.x<414 && e.mouseButton.y>9 && e.mouseButton.y<136){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta16.msf";
    }
    if(e.mouseButton.x>476 && e.mouseButton.x<604 && e.mouseButton.y>9 && e.mouseButton.y<136){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta14.msf";
    }
    if(e.mouseButton.x>9 && e.mouseButton.x<262 && e.mouseButton.y>178 && e.mouseButton.y<306){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta18.msf";
    }
    if(e.mouseButton.x>276 && e.mouseButton.x<466 && e.mouseButton.y>178 && e.mouseButton.y<306){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta24.msf";
    }
    if(e.mouseButton.x>482 && e.mouseButton.x<608 && e.mouseButton.y>182 && e.mouseButton.y<292){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta10.msf";
    }
    if(e.mouseButton.x>9 && e.mouseButton.x<262 && e.mouseButton.y>352 && e.mouseButton.y<482){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta32.msf";
    }
    if(e.mouseButton.x>306 && e.mouseButton.x<436 && e.mouseButton.y>352 && e.mouseButton.y<482){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta64.msf";
    }
    if(e.mouseButton.x>480 && e.mouseButton.x<608 && e.mouseButton.y>352 && e.mouseButton.y<482){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta7.msf";
    }
    if(e.mouseButton.x>73 && e.mouseButton.x<200 && e.mouseButton.y>536 && e.mouseButton.y<664){
      type=30;
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta30.msf";
    }
    if(e.mouseButton.x>306 && e.mouseButton.x<436 && e.mouseButton.y>536 && e.mouseButton.y<664){
-     pathReturnFile=userConfig+"/surfaces";
+     pathReturnFile=surfaceConfig+"/surfaces";
 	  nameReturnFile="meta35.msf";
    }
    if(e.mouseButton.x>485 && e.mouseButton.x<541 && e.mouseButton.y>603 && e.mouseButton.y<632){

@@ -1,3 +1,19 @@
+/* MetaSurface  .
+ *
+ * this file is part of the MetaSurface application
+ *
+ * Copyright 2020-2021 dominique Blanchemain
+ *
+ *
+ * MetaSurface is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License along with this program;
+* If not, see http://www.gnu.org/licenses.
+*/
 #include <SFML/Graphics.hpp>
 #include <libgen.h>
 #include <sstream>
@@ -25,11 +41,11 @@ using namespace std;
 Configuration::Configuration(string dossierInstall, string perso){
   std::stringstream adr;
   string Home=perso;
-  string ds="/metaSurface4/parametres.conf";
+  string ds="/metaSurface/parametres.conf";
   fichierParametres=Home+ds;
   adr.clear();
   adr.str("");
-  dossierUser=Home+"/metaSurface4";
+  dossierUser=Home+"/metaSurface";
   dossierConfig=dossierInstall;
   adr << std::fixed <<dossierConfig<< "/gui";
   appGui=adr.str();
@@ -321,4 +337,7 @@ void Configuration::setServeur(string serv){
 }
 void Configuration::setOsc(int oscP){
 	osc=osc;
+}
+void Configuration::setDaw(string dw){
+	daw=dw;
 }

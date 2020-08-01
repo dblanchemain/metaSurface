@@ -1,3 +1,19 @@
+/* MetaSurface  .
+ *
+ * this file is part of the MetaSurface application
+ *
+ * Copyright 2020-2021 dominique Blanchemain
+ *
+ *
+ * MetaSurface is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License along with this program;
+* If not, see http://www.gnu.org/licenses.
+*/
 #ifndef DEF_PLUGIN
 #define DEF_PLUGIN
 
@@ -55,6 +71,7 @@ class Plugin{
   sf::Sprite daw;
   sf::Texture idet;
   sf::Sprite faustIde;
+  sf::Sprite flog;
   
   int wWidth;
   int wheight;
@@ -70,6 +87,8 @@ class Plugin{
   int nbplug;
   
   bool externe;
+  bool flaglog;
+  sf::Text labelLog;
   
   struct parametre{
     int id;
@@ -77,6 +96,7 @@ class Plugin{
     float min;
     float max;
     std::string adr;
+    bool mod;
   };
   std::map<std::string, int> listPlugin;
   int idparam;
@@ -138,5 +158,7 @@ class Plugin{
   void mouseEditWheel(sf::Event e);
   
   void modifPlugin(int pid);
+  int getEditMode();
+  void setEditMode(int m);
 };
 #endif
