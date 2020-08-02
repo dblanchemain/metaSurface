@@ -1,0 +1,12 @@
+plugin=2,ReaDelay,-,/home/dominique/metaSurface/Plugins,8
+param=0,Wet,0,2,-,0;1,Dry,0,2,-,0;3,Time,0,1,-,1;4,Length,0,256,-,1;5,Feedback,0,2,-,1;6,LPF,0,1,-,0;7,HPF,0,1,-,0;10,Volume,0,2,-,0
+end=
+plugin=2,a-delay,-,/home/dominique/metaSurface/Plugins,5
+param=2,Time,1,8000,-,1;4,Dry/Wet,0,100,-,0;5,Feedback,0,100,-,0;6,LPF,20,20000,-,1;7,Gain,-60,0,-,0
+end=
+plugin=1,feedbackCombFilter,myFbComb,/home/dominique/metaSurface/Plugins,1
+param=0,delLength,1,2000,Comb_Filter/0x00/delLength,0
+end=
+plugin=2,nullgain,-,/home/dominique/metaSurface/Plugins,1
+param=0,X,0,1,-,0
+end=
