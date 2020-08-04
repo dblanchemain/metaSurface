@@ -46,4 +46,4 @@ else
 	cp  ./Plugins/nplug.lib ${dir}
 	cp  ./Plugins/usrPlugins ${dir}
 fi
-${HOME}/bin/metaSurface.bin "${HOME}/share/metaSurface" "${HOME}"
+/usr/local/bin/metaSurface.bin "/usr/local/share/metaSurface" "${HOME}"
