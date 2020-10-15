@@ -14,6 +14,7 @@ Pour intaller cette application :
 git clone https://github.com/dblanchemain/metaSurface
 
 make metaSurface
+
 make install PREFIX=/usr/local
 
 puis pour Linux :
