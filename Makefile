@@ -35,6 +35,7 @@ install:
 	echo port=3819 >> parametres.conf
 	echo serveur=localhost >> parametres.conf
 	echo OSC=5510 >> parametres.conf
+	cp -Rfa parametres.conf $(prefix)/share/metaSurface
 
 desinstall:
 
