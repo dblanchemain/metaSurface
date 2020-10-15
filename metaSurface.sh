@@ -6,7 +6,7 @@ if [ -d ${dir} ] ; then
 else    
 	mkdir ${dir}
 	echo "Le dossier paramètres ${dir} est créé"
-	cp  parametres.conf ${dir}
+	cp  /usr/local/share/metaSurface/parametres.conf ${dir}
 fi
 dir="${HOME}/metaSurface/Pad"
 if [ -d ${dir} ] ; then
