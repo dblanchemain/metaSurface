@@ -293,6 +293,7 @@ ifstream fichier(def->getFichierTheme(), ios::in);
   }else{  // sinon
        cerr << "Erreur à l'ouverture init surface Theme!" << endl;
   }
+  surfaceTypeDef=0;
   selectPad=0;
   padActif=0;
   surfaceMode=0;
@@ -1248,7 +1249,7 @@ void metaSurface::onClickSurface(sf::Event e){
    //*********************************************************************************************************************
    //													séléction d'un pavé
    //*********************************************************************************************************************
-   if(e.mouseButton.x>workspaceSurface.getPosition().x && e.mouseButton.x<workspaceSurface.getPosition().x+workspaceSurface.getSize().x  && e.mouseButton.y>workspaceSurface.getPosition().y && e.mouseButton.y<workspaceSurface.getPosition().y+workspaceSurface.getSize().y){
+   if(surfaceTypeDef!=0 && e.mouseButton.x>workspaceSurface.getPosition().x && e.mouseButton.x<workspaceSurface.getPosition().x+workspaceSurface.getSize().x  && e.mouseButton.y>workspaceSurface.getPosition().y && e.mouseButton.y<workspaceSurface.getPosition().y+workspaceSurface.getSize().y){
 		int vret=0;
 		if(e.mouseButton.button == sf::Mouse::Right){
    		vret=locatePoint(e.mouseButton.x, e.mouseButton.y,1);
