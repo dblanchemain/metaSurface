@@ -3838,7 +3838,7 @@ void metaSurface::genDSP(string port, string mitx){
    }
    
    prog=prog+"import(\"stdfaust.lib\");";
-	prog=prog+"import(\""+ref->getDossierConfig()+"/faust/soundfiles.lib\");";
+	prog=prog+"import(\"soundfiles.lib\");";
 	prog=prog+"import(\""+ref->getDossierConfig()+"/faust/metaSurfaceFaust.lib\");";
 	std::map<string, string>::iterator it;
   	for(it=lstPlugins.begin();it!=lstPlugins.end();it++){
