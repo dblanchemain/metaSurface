@@ -45,13 +45,6 @@ int main (int argc, char* argv[]){
   
   //nwApp.appWindow();
 
-
-  
-  
-  
-      
-    
-  
   return EXIT_SUCCESS;
   
 }
