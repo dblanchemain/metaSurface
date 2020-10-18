@@ -26,9 +26,8 @@ dir="${HOME}/metaSurface/surfacesBkg"
 if [ -d ${dir} ] ; then
     echo "Le dossier des pavages ${dir} existe"
 else    
-	dir="${HOME}/metaSurface"
 	echo "Le dossier des pavages ${dir} est créé"
-	cp  ./surfacesBkg ${dir}
+	cp -r /usr/local/share/metaSurface/surfacesBkg ${dir}
 fi
 dir="${HOME}/metaSurface/sounds"
 if [ -d ${dir} ] ; then
