@@ -404,22 +404,16 @@ void selectFile::onClick(sf::Event e){
    }
    if(e.mouseButton.x>200 && e.mouseButton.x<winSelectorWidth && e.mouseButton.y>36 && e.mouseButton.y<400){
      int id=((e.mouseButton.y-40)/18)+listFilesIndex2;
-     nText.setString(vecFs[id]);
-     rtf=vecFs[id];
-     newSelect=vecFs[id];
-     selectType=1;
-     if(vecFs[id].length()>5){
-	     string extension=vecFs[id].substr(vecFs[id].length()-4,4);
-	     string extension2=vecFs[id].substr(vecFs[id].length()-5,5);
-		  if((extension2==".flac" || extension2==".aiff" || extension==".wav" || extension==".ogg" ) && e.mouseButton.x<232){
-		  	 char file[vecFs[id].length() + 1];
-	       strcpy(file, vecFs[id].c_str());
-	       char commande[255];
-	       snprintf(commande, 255, "%s %s/%s", simplePlayer,getcwd(NULL,0), file);
-	       std::cout << "player : " << commande << std::endl;
-		    system(commande);
-		  }
-	  }
+     if(id<vecFs.size()){
+     	nText.setString(vecFs[id]);
+    	rtf=vecFs[id];
+     	newSelect=vecFs[id];
+     	selectType=1;
+     }else{
+	nText.setString("");
+	rtf="";
+	newSelect="";
+     }
    }
    if(e.mouseButton.x>362 && e.mouseButton.x<418 && e.mouseButton.y>406 && e.mouseButton.y<432){
      rtf="";
