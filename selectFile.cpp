@@ -391,14 +391,16 @@ void selectFile::onClick(sf::Event e){
    }
    if(e.mouseButton.x>0 && e.mouseButton.x<178 && e.mouseButton.y>36 && e.mouseButton.y<380){
      int id=((e.mouseButton.y-40)/18)+listDirsIndex2;
-     selectType=0;
-     adr << std::fixed <<getcwd(NULL,0) <<"/"<<vecDirs[id];
-     dossierPath.setString(adr.str());
-     listDirs(adr.str());
-     readFiles();
-     std::cout << "index dir: " <<vecDirs[id]<< "path :"<<adr.str()<<"listDirIndex "<<listDirsIndex2 << std::endl;
-     adr.clear();
-     adr.str("");
+     if(id<vecDirs.size()){
+     	selectType=0;
+     	adr << std::fixed <<getcwd(NULL,0) <<"/"<<vecDirs[id];
+    	dossierPath.setString(adr.str());
+    	listDirs(adr.str());
+     	readFiles();
+     	std::cout << "index dir: " <<vecDirs[id]<< "path :"<<adr.str()<<"listDirIndex "<<listDirsIndex2 << std::endl;
+    	adr.clear();
+    	adr.str("");
+     }
    }
    if(e.mouseButton.x>200 && e.mouseButton.x<winSelectorWidth && e.mouseButton.y>36 && e.mouseButton.y<400){
      int id=((e.mouseButton.y-40)/18)+listFilesIndex2;
