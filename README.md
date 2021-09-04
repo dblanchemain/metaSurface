@@ -1,7 +1,7 @@
 # metaSurface64 
 est une surface de contrôle de transformations continues du son en temps réel qui dispose à la fois de son propre générateur de boucles jusqu'à 64 voix et d'un moteur FX multieffets.
 
-Chaque pavé de cette surface peut permettre de contôler directement le gain et les plug-ins attachés. Il est possible également de contrôler les pistes et les plug-ins d'un séquenceur externe (Ardour ou Reaper). Pour ce faire, l'application utilise des modules contrôlables par OSC qui proviennent de la librairie du langage Faust qui est embarqué dans l'application. Il est également possible de disposer d'une entrée externe pour un pavé.
+Chaque pavé de cette surface peut permettre de contôler directement le gain et les greffons attachés. Il est possible également de contrôler les pistes et les plug-ins d'un séquenceur externe (Ardour ou Reaper). Pour ce faire, l'application utilise des modules contrôlables par OSC qui proviennent de la librairie du langage Faust qui est embarqué dans l'application. Il est également possible de disposer d'une entrée externe pour un pavé.
 
 Il est proposé d'écrire et d'intégrer de nouveaux plug-ins en langage Faust à la surface. Vous pouvez également définir les contrôleurs pour des plug-ins externes incorporés à votre DAW.
 
